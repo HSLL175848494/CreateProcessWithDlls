@@ -8,12 +8,9 @@ namespace HSLL
 {
 	class CreateProcessWithDlls
 	{
+	public:
+
 		BOOL errorCode;
-		DWORD codeSize;
-		BYTE* binaryCode;
-		DWORD64 imageBase;
-		STARTUPINFOA startInfo{};
-		PROCESS_INFORMATION processInfo{};
 
 		static constexpr LPCSTR errorInfo[11] = {
 		"Œ¥∑¢…˙¥ÌŒÛ",
@@ -29,6 +26,13 @@ namespace HSLL
 		"–¥»Î÷∏¡Ó ß∞‹"
 		};
 
+	private:
+
+		DWORD codeSize;
+		BYTE* binaryCode;
+		DWORD64 imageBase;
+		STARTUPINFOA startInfo{};
+		PROCESS_INFORMATION processInfo{};
 
 		static constexpr BYTE binaryCode32[38] = {
 		0x53,               // push ebx
@@ -233,8 +237,8 @@ namespace HSLL
 			CloseHandle(hRemoteThread);
 			VirtualFreeEx(processInfo.hProcess, remoteAddr, 0, MEM_RELEASE);
 
-			errorCode = 0;
 			once = true;
+			errorCode = 0;
 			return TRUE;
 		}
 
@@ -246,8 +250,10 @@ namespace HSLL
 				errorCode = 3;
 				return FALSE;
 			}
+
 			ResumeThread(processInfo.hThread);
 			once = true;
+			errorCode = 0;
 			return TRUE;
 		}
 
@@ -258,6 +264,7 @@ namespace HSLL
 				errorCode = 10;
 				return FALSE;
 			}
+			errorCode = 0;
 			return TRUE;
 		}
 
@@ -281,6 +288,15 @@ namespace HSLL
 			codeSize = 38;
 #endif // _WIN32
 
+		}
+
+		~CreateProcessWithDlls()
+		{
+			if (!errorCode)
+			{
+				CloseHandle(processInfo.hProcess);
+				CloseHandle(processInfo.hThread);
+			}
 		}
 
 		CreateProcessWithDlls(const CreateProcessWithDlls&) = delete;
