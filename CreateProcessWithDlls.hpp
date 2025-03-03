@@ -12,20 +12,6 @@ namespace HSLL
 
 		BOOL errorCode;
 
-		static constexpr LPCSTR errorInfo[11] = {
-		"Î´·¢Éú´íÎó",
-		"´´½¨½ø³ÌÊ§°Ü",
-		"»ñÈ¡½ø³Ì»ùÖ·Ê§°Ü",
-		"¸Ãº¯Êı²»ÔÊĞí¶à´Îµ÷ÓÃ",
-		"dlls²»ÔÊĞíÎªnullptr¶ønum²»ÔÊĞíÎª0"
-		"»ñÈ¡½ø³ÌLoadLibraryAº¯ÊıµØÖ·Ê§°Ü",
-		"ÔÚÄ¿±ê½ø³ÌÖĞÉêÇëÄÚ´æÊ§°Ü",
-		"ÔÚÄ¿±ê½ø³ÌÖĞĞ´ÈëdllµØÖ·×Ö·û´®Ê§°Ü",
-		"ĞŞ¸ÄÄÚ´æÊôĞÔÊ§°Ü",
-		"´´½¨Ô¶³ÌÏß³ÌÊ§°Ü",
-		"Ğ´ÈëÖ¸ÁîÊ§°Ü"
-		};
-
 	private:
 
 		DWORD codeSize;
@@ -34,24 +20,38 @@ namespace HSLL
 		STARTUPINFOA startInfo{};
 		PROCESS_INFORMATION processInfo{};
 
+		static constexpr LPCSTR errorInfo[11] = {
+		"æœªå‘ç”Ÿé”™è¯¯",
+		"åˆ›å»ºè¿›ç¨‹å¤±è´¥",
+		"è·å–è¿›ç¨‹åŸºå€å¤±è´¥",
+		"è¯¥å‡½æ•°ä¸å…è®¸å¤šæ¬¡è°ƒç”¨",
+		"dllsä¸å…è®¸ä¸ºnullptrè€Œnumä¸å…è®¸ä¸º0"
+		"è·å–è¿›ç¨‹LoadLibraryAå‡½æ•°åœ°å€å¤±è´¥",
+		"åœ¨ç›®æ ‡è¿›ç¨‹ä¸­ç”³è¯·å†…å­˜å¤±è´¥",
+		"åœ¨ç›®æ ‡è¿›ç¨‹ä¸­å†™å…¥dllåœ°å€å­—ç¬¦ä¸²å¤±è´¥",
+		"ä¿®æ”¹å†…å­˜å±æ€§å¤±è´¥",
+		"åˆ›å»ºè¿œç¨‹çº¿ç¨‹å¤±è´¥",
+		"å†™å…¥æŒ‡ä»¤å¤±è´¥"
+		};
+
 		static constexpr BYTE binaryCode32[38] = {
 		0x53,               // push ebx
 		0x56,               // push esi
 		0x57,               // push edi
-		0x8B, 0x44, 0x24, 0x10, // mov eax, [esp+10h] ; »ñÈ¡²ÎÊıµØÖ·
-		0x8B, 0x18,         // mov ebx, [eax]        ; LoadLibraryAº¯ÊıÖ¸Õë
-		0x8B, 0x78, 0x08,   // mov edi, [eax+8]      ; Ä£¿éÊıÁ¿
-		0x8D, 0x70, 0x0C,   // lea esi, [eax+0Ch]    ; ×Ö·û´®Êı×éÆğÊ¼µØÖ·
-		0x85, 0xFF,         // test edi, edi         ; ¼ì²éÄ£¿éÊıÁ¿ÊÇ·ñÎª0
-		0x74, 0x0F,         // je Ìø³öÑ­»·           ; ÊıÁ¿Îª0Ö±½Ó½áÊø
-		0x56,               // push esi              ; Ñ¹Èë×Ö·û´®²ÎÊı
-		0xFF, 0xD3,         // call ebx              ; µ÷ÓÃLoadLibraryA
-		0x46,               // inc esi               ; Ìøµ½ÏÂÒ»¸ö×Ö·û
-		0x80, 0x3E, 0x00,   // cmp byte ptr [esi], 0 ; ¼ì²é×Ö·û´®½áÊø·û
-		0x75, 0xFA,         // jne »ØÍËµ½inc esi     ; ¼ÌĞø±éÀú×Ö·û´®
-		0x46,               // inc esi               ; Ìø¹ınullÖÕÖ¹·û
-		0x83, 0xEF, 0x01,   // sub edi, 1            ; Ä£¿é¼ÆÊıÆ÷¼õ1
-		0x75, 0xED,         // jne Ñ­»·¿ªÊ¼          ; ¼ÌĞø¼ÓÔØÏÂÒ»¸öÄ£¿é
+		0x8B, 0x44, 0x24, 0x10, // mov eax, [esp+10h] ; è·å–å‚æ•°åœ°å€
+		0x8B, 0x18,         // mov ebx, [eax]        ; LoadLibraryAå‡½æ•°æŒ‡é’ˆ
+		0x8B, 0x78, 0x08,   // mov edi, [eax+8]      ; æ¨¡å—æ•°é‡
+		0x8D, 0x70, 0x0C,   // lea esi, [eax+0Ch]    ; å­—ç¬¦ä¸²æ•°ç»„èµ·å§‹åœ°å€
+		0x85, 0xFF,         // test edi, edi         ; æ£€æŸ¥æ¨¡å—æ•°é‡æ˜¯å¦ä¸º0
+		0x74, 0x0F,         // je è·³å‡ºå¾ªç¯           ; æ•°é‡ä¸º0ç›´æ¥ç»“æŸ
+		0x56,               // push esi              ; å‹å…¥å­—ç¬¦ä¸²å‚æ•°
+		0xFF, 0xD3,         // call ebx              ; è°ƒç”¨LoadLibraryA
+		0x46,               // inc esi               ; è·³åˆ°ä¸‹ä¸€ä¸ªå­—ç¬¦
+		0x80, 0x3E, 0x00,   // cmp byte ptr [esi], 0 ; æ£€æŸ¥å­—ç¬¦ä¸²ç»“æŸç¬¦
+		0x75, 0xFA,         // jne å›é€€åˆ°inc esi     ; ç»§ç»­éå†å­—ç¬¦ä¸²
+		0x46,               // inc esi               ; è·³è¿‡nullç»ˆæ­¢ç¬¦
+		0x83, 0xEF, 0x01,   // sub edi, 1            ; æ¨¡å—è®¡æ•°å™¨å‡1
+		0x75, 0xED,         // jne å¾ªç¯å¼€å§‹          ; ç»§ç»­åŠ è½½ä¸‹ä¸€ä¸ªæ¨¡å—
 		0x5F,               // pop edi
 		0x5E,               // pop esi
 		0x5B,               // pop ebx
@@ -208,6 +208,7 @@ namespace HSLL
 			{
 				VirtualFreeEx(processInfo.hProcess, remoteAddr, 0, MEM_RELEASE);
 				errorCode = 7;
+				delete[] temp;
 				return FALSE;
 			}
 
@@ -266,6 +267,11 @@ namespace HSLL
 			}
 			errorCode = 0;
 			return TRUE;
+		}
+
+		LPCSTR GetErrorInfo()
+		{
+			return errorInfo[errorCode];
 		}
 
 		CreateProcessWithDlls(LPCSTR proCreateProcessWithDlls) : errorCode(0)
