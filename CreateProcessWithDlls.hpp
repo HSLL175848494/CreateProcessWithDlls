@@ -14,6 +14,7 @@ namespace HSLL
 
 	private:
 
+		BOOL cSucceed;
 		DWORD codeSize;
 		BYTE* binaryCode;
 		DWORD64 imageBase;
@@ -22,36 +23,36 @@ namespace HSLL
 
 		static constexpr LPCSTR errorInfo[11] = {
 		"未发生错误",
-		"创建进程失败",
+		"创建进程失败,请检测路径是否正确",
 		"获取进程基址失败",
 		"该函数不允许多次调用",
-		"dlls不允许为nullptr而num不允许为0"
-		"获取进程LoadLibraryA函数地址失败",
-		"在目标进程中申请内存失败",
-		"在目标进程中写入dll地址字符串失败",
+		"dlls不允许为空而num不允许为0",
+		"枚举kernel32.dll模块失败",
+		"目标进程内申请内存失败",
+		"目标进程内写入dll地址字符串失败",
 		"修改内存属性失败",
 		"创建远程线程失败",
-		"写入指令失败"
+		"写入内存失败"
 		};
 
 		static constexpr BYTE binaryCode32[38] = {
 		0x53,               // push ebx
 		0x56,               // push esi
 		0x57,               // push edi
-		0x8B, 0x44, 0x24, 0x10, // mov eax, [esp+10h] ; 获取参数地址
-		0x8B, 0x18,         // mov ebx, [eax]        ; LoadLibraryA函数指针
-		0x8B, 0x78, 0x08,   // mov edi, [eax+8]      ; 模块数量
-		0x8D, 0x70, 0x0C,   // lea esi, [eax+0Ch]    ; 字符串数组起始地址
-		0x85, 0xFF,         // test edi, edi         ; 检查模块数量是否为0
-		0x74, 0x0F,         // je 跳出循环           ; 数量为0直接结束
-		0x56,               // push esi              ; 压入字符串参数
-		0xFF, 0xD3,         // call ebx              ; 调用LoadLibraryA
-		0x46,               // inc esi               ; 跳到下一个字符
-		0x80, 0x3E, 0x00,   // cmp byte ptr [esi], 0 ; 检查字符串结束符
-		0x75, 0xFA,         // jne 回退到inc esi     ; 继续遍历字符串
-		0x46,               // inc esi               ; 跳过null终止符
-		0x83, 0xEF, 0x01,   // sub edi, 1            ; 模块计数器减1
-		0x75, 0xED,         // jne 循环开始          ; 继续加载下一个模块
+		0x8B, 0x44, 0x24, 0x10, // mov eax, [esp+10h] 
+		0x8B, 0x18,         // mov ebx, [eax]
+		0x8B, 0x78, 0x08,   // mov edi, [eax+8]
+		0x8D, 0x70, 0x0C,   // lea esi, [eax+0Ch]
+		0x85, 0xFF,         // test edi, edi   
+		0x74, 0x0F,         // je...
+		0x56,               // push esi 
+		0xFF, 0xD3,         // call ebx    
+		0x46,               // inc esi  
+		0x80, 0x3E, 0x00,   // cmp byte ptr [esi], 0
+		0x75, 0xFA,         // jne ...
+		0x46,               // inc esi
+		0x83, 0xEF, 0x01,   // sub edi, 1
+		0x75, 0xED,         // jne ...
 		0x5F,               // pop edi
 		0x5E,               // pop esi
 		0x5B,               // pop ebx
@@ -260,7 +261,7 @@ namespace HSLL
 
 		BOOL WriteMemory(DWORD64 offset, BYTE* code, DWORD size)
 		{
-			if (!WriteProcessMemory(processInfo.hProcess, (LPVOID)(imageBase + offset), code, size, nullptr))
+			if ((!code)||(!WriteProcessMemory(processInfo.hProcess, (LPVOID)(imageBase + offset), code, size, nullptr)))
 			{
 				errorCode = 10;
 				return FALSE;
@@ -274,16 +275,19 @@ namespace HSLL
 			return errorInfo[errorCode];
 		}
 
-		CreateProcessWithDlls(LPCSTR proCreateProcessWithDlls) : errorCode(0)
+		CreateProcessWithDlls(LPCSTR process) : errorCode(0), cSucceed(FALSE)
 		{
-			if (!CreateProcessA(proCreateProcessWithDlls, nullptr, nullptr, nullptr, FALSE, CREATE_SUSPENDED, nullptr, nullptr, &startInfo, &processInfo))
+			if (!CreateProcessA(process, nullptr, nullptr, nullptr, FALSE, CREATE_SUSPENDED, nullptr, nullptr, &startInfo, &processInfo))
 			{
 				errorCode = 1;
 				return;
 			}
 
 			if (!GetProcessImageBase())
+			{
 				errorCode = 2;
+				return;
+			}
 
 #ifdef _WIN64
 			binaryCode = (BYTE*)binaryCode64;
@@ -292,13 +296,15 @@ namespace HSLL
 #else
 			binaryCode = (BYTE*)binaryCode32;
 			codeSize = 38;
+
 #endif // _WIN32
 
+			cSucceed = TRUE;
 		}
 
 		~CreateProcessWithDlls()
 		{
-			if (!errorCode)
+			if (cSucceed)
 			{
 				CloseHandle(processInfo.hProcess);
 				CloseHandle(processInfo.hThread);
