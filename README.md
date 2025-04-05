@@ -1,4 +1,4 @@
-# HSLL::CreateProcessWithDlls - 进程创建与DLL注入工具类
+# CreateProcessWithDlls - 进程创建与DLL注入工具类
 
 ## 功能概述
 本工具类用于创建挂起状态的进程并注入多个DLL，支持32/64位进程。主要特性：
