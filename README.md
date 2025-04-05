@@ -1,4 +1,3 @@
-```markdown
 # HSLL::CreateProcessWithDlls - 进程创建与DLL注入工具类
 
 ## 功能概述
