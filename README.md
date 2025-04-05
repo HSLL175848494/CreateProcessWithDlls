@@ -14,13 +14,6 @@
 2. 调用`LoadDlls`注入DLL
 3. 调用`ResumeProcess`恢复进程执行
 
-### 头文件依赖
-- Windows SDK
-- \<windows.h\>
-- \<tlhelp32.h\>
-
----
-
 ## 示例代码
 ```cpp
 #include "CreateProcessWithDlls.h"
